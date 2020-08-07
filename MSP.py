@@ -5,9 +5,22 @@ class MSP:
 		self.instanceName = instanceFilename.split(".")[0]
 		self.loadInstance(instanceFilename)
 
-	def loadInstance(self, instanceFilename):
-		instanceFile = open(instanceFilename, "r+")
-		with open(instanceFile) as file:
-			# parseStuff
+		self.agentsTotal = 0
+		self.agents = {}
+		self.meetingsTotal = 0
+		self.meetings = {}
 
+	def loadInstance(self, instanceFilename):
+		with open(instanceFilename) as file:
+			data = file.read().splitlines()
+
+		self.agentsTotal = int(data[1])
+		self.agents = dict.fromkeys(data[4].split(), {})
+		self.meetingsTotal = int(data[7])
+		self.meetings = dict.fromkeys(data[10].split(), {})
+		print(data)
+		print(self.agentsTotal)
+		print(self.agents)
+		print(self.meetingsTotal)
+		print(self.meetings)
 x = MSP("instance.dat")
