@@ -1,0 +1,26 @@
+AgentsTotal:
+4
+
+Agents:
+A1 A2 A3 A4
+
+MeetingsTotal:
+4
+
+Mettings:
+M1 M2 M3 M4
+
+AgentsMeetings:
+M1 M3 M4
+M2 M4
+M1 M2
+M2 M3
+
+MeetingsDistance:
+0 1 1 2
+1 0 3 2
+1 3 0 2
+2 2 2 0
+
+MeetingsDuration:
+5 10 25 15
