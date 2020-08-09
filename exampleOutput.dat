@@ -1,0 +1,25 @@
+Instance name: exampleInstance
+Total Agents: 4
+Total Meetings: 4
+Details:
+ Meeting: M1
+   Agents: A1 A3
+   Duration: 5
+ Meeting: M2
+   Agents: A2 A3 A4
+   Duration: 10
+ Meeting: M3
+   Agents: A1 A4
+   Duration: 25
+ Meeting: M4
+   Agents: A1 A2
+   Duration: 15
+Instance exampleInstance solved.
+Iterations: 37495770
+Objetive function value: 306
+Elapsed time: 469.18664503097534 [s]
+Scheduling details:
+ Meeting: M1 scheduled at 26
+ Meeting: M2 scheduled at 32
+ Meeting: M3 scheduled at 0
+ Meeting: M4 scheduled at 44
