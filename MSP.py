@@ -1,5 +1,6 @@
-from json import dumps
+
 from copy import deepcopy
+from time import time
 
 class MSP:
 
@@ -10,6 +11,7 @@ class MSP:
 		self.printInstance()
 		self.initializeSolution()
 		self.solveInstance()
+		self.printSolution()
 
 	def loadInstance(self, instanceFilename):
 		with open(instanceFilename) as file:
@@ -29,7 +31,7 @@ class MSP:
 
 		for i in range(self.agentsTotal + 15, self.agentsTotal + self.meetingsTotal + 15):
 			d = data[i].split()
-			self.meetingsData[d[0]] = dict({'dur': 0, 'agents': [], 'start': 0, 'dist': dict(zip(d[1::2], map(int, d[2::2])))})
+			self.meetingsData[d[0]] = dict({'dur': 0, 'agents': [], 'start': 0, 'dist': dict(zip(d[1::2] + [d[0]], list(map(int, d[2::2])) + [0]))})
 
 		for i in range(self.agentsTotal + self.meetingsTotal + 17, self.agentsTotal + self.meetingsTotal * 2 + 17):
 			d = data[i].split()
@@ -45,33 +47,60 @@ class MSP:
 		for m1 in self.meetings:
 			self.B[m1] = dict.fromkeys(self.meetingsData.keys(), 0)
 			for m2 in self.meetings:
-				if m1 == m2:
-					continue
-
 				if set(self.meetingsData[m1]['agents']) & set(self.meetingsData[m1]['agents']):
 					self.B[m1][m2] = 1
 
-	def printInstance(self):
-		print("Instance:", self.instanceName)
-		print("Total Agents:", self.agentsTotal)
-		print("Agents detail:")
-		print(dumps(self.agentsData, sort_keys=True, indent=4))
-		print("Total Meetings:", self.meetingsTotal)
-		print("Meetings detail:")
-		print(dumps(self.meetingsData, sort_keys=True, indent=4))
-		print("B:", self.B)
-		print("lowerBound:", self.lowerBound)
-		print("upperBound:", self.upperBound)
-
 	def initializeBounds(self):
-		self.lowerBound = 1
-		self.upperBound = sum(v['dur'] for _, v in self.meetingsData.items()) + len(self.meetingsData) * sum(sum(v['dist'].values()) for _, v in self.meetingsData.items())
+		self.lowerBound = 0
+		self.upperBound = sum(v['dur'] for _, v in self.meetingsData.items()) + sum(sum(v['dist'].values()) for _, v in self.meetingsData.items())
 
 	def initializeSolution(self):
 		self.minValue = float("inf")
 		self.minSol = {}
 
+	def printInstance(self):
+		print("Instance name:", self.instanceName)
+		print("Total Agents:", self.agentsTotal)
+		print("Total Meetings:", self.meetingsTotal)
+		print("Details:")
+
+		for m, data in self.meetingsData.items():
+			print(" Meeting:", m )
+			print("   Agents:", ' '.join(data['agents']) )
+			print("   Duration:", data['dur'] )
+
+	def printSolution(self):
+		print("Instance", self.instanceName, "solved.")
+		print("Iterations:", self.iterations)
+		print("Objetive function value:", self.minValue)
+		print("Elapsed time: %s [s]" % (self.endTime - self.startTime))
+		print("Scheduling details:")
+
+		for m, schedule in self.minSol.items():
+			print(" Meeting:", m, "scheduled at", schedule)
+
 	def checkSolution(self, sol):
+		O = dict.fromkeys(self.meetingsData.keys(), -1)
+
+		for m1 in self.meetings:
+			O[m1] = dict.fromkeys(self.meetingsData.keys(), 0)
+			for m2 in self.meetings:
+				if m1 == m2:
+					continue
+
+				if self.B[m1][m2] and sol[m1] < sol[m2]:
+					O[m1][m2] = 1
+
+		for m1 in self.meetings:
+			for m2 in self.meetings:
+				if m1 == m2:
+					continue
+
+				if (sol[m1] + self.meetingsData[m1]['dur'] + self.meetingsData[m1]['dist'][m2]) * O[m1][m2] * self.B[m1][m2] > sol[m2]:
+					return False
+
+				if O[m1][m2] + O[m2][m1] != 1:
+					return False
 		return True
 
 	def getSolutionValue(self, sol):
@@ -84,15 +113,15 @@ class MSP:
 
 	def doBacktracking(self, sol, m):
 		for i in range(self.lowerBound, self.upperBound + 1):
+			self.iterations += 1
 			sol[self.meetings[m]] = i
-
-			if not self.checkSolution(sol):
-				continue
-
+				
 			if m < len(self.meetings) - 1:
 				self.doBacktracking(sol, m + 1)
 			else:
-				#print(sol)
+				if not self.checkSolution(sol):
+					continue
+					
 				solValue = self.getSolutionValue(sol)
 				if solValue < self.minValue:
 					self.minValue = solValue
@@ -100,8 +129,9 @@ class MSP:
 
 	def solveInstance(self):
 		sol = dict.fromkeys(self.meetingsData.keys(), 0)
+		self.iterations = 0
+		self.startTime = time()
 		self.doBacktracking(sol, 0)
-		print(self.minSol)
-		print(self.minValue)
+		self.endTime = time()
 
-x = MSP("instance.dat")
+x = MSP("exampleInstance.dat")

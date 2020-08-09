@@ -1,2 +1,2 @@
 # MSP-Solver
-Solver for Meeting Scheduling Problem
+Backtracking Solver for the Meeting Scheduling Problem
